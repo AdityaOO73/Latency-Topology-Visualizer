@@ -91,7 +91,7 @@ export function startApiPolling(endpoint = '/api/latency') {
       }
       state.bulkUpsert(updated);
       backoff = 2000; // reset on success
-    } catch (e) {
+    } catch {
       // expo backoff up to 60s
       backoff = Math.min(backoff * 2, 60000);
     } finally {
@@ -99,8 +99,12 @@ export function startApiPolling(endpoint = '/api/latency') {
     }
   };
 
-  // start using idle time for better TTI
-  (window).requestIdleCallback?.(tick) ?? setTimeout(tick, 0);
+if ('requestIdleCallback' in window) {
+  (window).requestIdleCallback(tick);
+} else {
+  setTimeout(tick, 0);
+}
+
 
   return () => {
     controller.abort();
